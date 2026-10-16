@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus AI Studio</title>
+  <title>UnCenGpt AI Studio - Photorealistic</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,38 +13,64 @@
   <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 via-purple-500 to-indigo-500 p-[2px]">
           <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-lg"></i>
+            <i class="fa-solid fa-camera-retro text-rose-400 text-xl"></i>
           </div>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight text-white">Nexus AI Studio</h1>
-          <p class="text-xs text-indigo-400 font-medium">Qwen & Flux Power</p>
+          <h1 class="font-bold text-lg leading-tight text-white">UnCenGpt AI Studio</h1>
+          <p class="text-xs text-rose-400 font-medium">Ultra-Realistic Photography Mode</p>
         </div>
       </div>
       <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        100% Free
+        100% Real Look
       </span>
     </div>
   </header>
 
+  <!-- Navigation Tabs -->
+  <div class="max-w-4xl w-full mx-auto px-4 pt-4">
+    <div class="flex bg-slate-900 border border-slate-800 rounded-xl p-1 gap-1">
+      <button id="tabTextToImg" class="flex-1 py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Text to Photo
+      </button>
+      <button id="tabImgToImg" class="flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-image"></i> Edit / Real-Fix Photo
+      </button>
+    </div>
+  </div>
+
   <!-- Main Content -->
   <main class="flex-1 max-w-4xl w-full mx-auto p-4 grid grid-cols-1 md:grid-cols-12 gap-6">
     
-    <!-- Controls -->
+    <!-- Controls Panel -->
     <div class="md:col-span-6 flex flex-col gap-4">
+      
+      <!-- Upload Box -->
+      <div id="uploadSection" class="hidden bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+        <label class="text-xs text-slate-300 font-bold block mb-2">Upload Photo to Enhance/Edit</label>
+        <input type="file" id="imageInput" accept="image/*" class="hidden" />
+        <div id="uploadDropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-4 text-center cursor-pointer bg-slate-950 transition-all flex flex-col items-center justify-center gap-2 min-h-[120px]">
+          <i class="fa-solid fa-cloud-arrow-up text-indigo-400 text-2xl"></i>
+          <span id="uploadStatusText" class="text-xs text-slate-400">Tap to choose a photo from phone</span>
+        </div>
+        <img id="uploadPreview" class="hidden mt-3 max-h-40 mx-auto rounded-lg border border-slate-700 object-contain" />
+      </div>
+
+      <!-- Prompt Input -->
       <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
-        <label for="promptInput" class="text-sm font-semibold text-slate-300 block mb-2">Input Prompt</label>
-        <textarea id="promptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" placeholder="Type your prompt... (e.g. A futuristic Sri Lankan cyber warrior)"></textarea>
+        <label for="promptInput" class="text-sm font-semibold text-slate-300 block mb-2" id="promptLabel">Input Prompt</label>
+        <textarea id="promptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" placeholder="Describe your photo... (e.g. A portrait of a Sri Lankan woman smiling, natural outdoor daylight)"></textarea>
 
         <button id="enhanceBtn" class="mt-3 w-full py-2.5 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-xl text-xs font-semibold text-purple-200 flex items-center justify-center gap-2">
           <i class="fa-solid fa-brain text-purple-400"></i>
-          <span>Enhance Prompt with Qwen AI</span>
+          <span>Make Real & Detailed with Qwen AI</span>
         </button>
       </div>
 
+      <!-- Aspect Ratio -->
       <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
         <label class="text-xs text-slate-400 mb-2 block font-medium">Aspect Ratio</label>
         <div class="grid grid-cols-3 gap-2" id="aspectGroup">
@@ -54,35 +80,36 @@
         </div>
       </div>
 
-      <button id="generateBtn" class="w-full py-3.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span>Generate Image</span>
+      <!-- Action Button -->
+      <button id="generateBtn" class="w-full py-3.5 bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 text-white font-bold text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2">
+        <i class="fa-solid fa-camera"></i>
+        <span id="btnText">Generate Realistic Photo</span>
       </button>
     </div>
 
-    <!-- Output Preview -->
+    <!-- Output Preview Panel -->
     <div class="md:col-span-6 flex flex-col">
       <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex-1 flex flex-col min-h-[350px]">
         <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-semibold text-slate-300">Generated Result</span>
+          <span class="text-sm font-semibold text-slate-300">Result</span>
           <span id="statusBadge" class="text-[11px] text-slate-500">Ready</span>
         </div>
 
         <div class="flex-1 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[250px]">
           <div id="placeholderView" class="text-center p-6 text-slate-600 text-xs">
-            Enter a prompt and tap 'Generate Image'
+            Enter prompt and tap generate button
           </div>
 
           <div id="loadingView" class="hidden absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-3">
             <div class="w-10 h-10 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
-            <p class="text-xs text-indigo-300 animate-pulse">Generating Image...</p>
+            <p id="loadingMsg" class="text-xs text-indigo-300 animate-pulse">Capturing realistic photo...</p>
           </div>
 
           <img id="resultImg" class="hidden w-full h-full object-contain max-h-[450px]" alt="AI Output" />
         </div>
 
         <div id="imageActions" class="hidden mt-4 grid grid-cols-2 gap-3">
-          <a id="downloadBtn" download="ai-image.png" target="_blank" class="py-2.5 bg-slate-800 text-center text-slate-200 text-xs font-semibold rounded-xl">Download HD</a>
+          <a id="downloadBtn" download="realistic-photo.png" target="_blank" class="py-2.5 bg-slate-800 text-center text-slate-200 text-xs font-semibold rounded-xl">Download HD</a>
           <button id="copyBtn" class="py-2.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl">Copy Prompt</button>
         </div>
       </div>
@@ -92,17 +119,78 @@
 
   <script>
     let width = 1024, height = 1024;
+    let currentMode = 'text2img';
+    let uploadedImageUrl = '';
+
+    const tabTextToImg = document.getElementById('tabTextToImg');
+    const tabImgToImg = document.getElementById('tabImgToImg');
+    const uploadSection = document.getElementById('uploadSection');
+    const uploadDropzone = document.getElementById('uploadDropzone');
+    const imageInput = document.getElementById('imageInput');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const uploadStatusText = document.getElementById('uploadStatusText');
+    
     const promptInput = document.getElementById('promptInput');
+    const promptLabel = document.getElementById('promptLabel');
     const enhanceBtn = document.getElementById('enhanceBtn');
     const generateBtn = document.getElementById('generateBtn');
+    const btnText = document.getElementById('btnText');
+    
     const placeholderView = document.getElementById('placeholderView');
     const loadingView = document.getElementById('loadingView');
+    const loadingMsg = document.getElementById('loadingMsg');
     const resultImg = document.getElementById('resultImg');
     const imageActions = document.getElementById('imageActions');
     const downloadBtn = document.getElementById('downloadBtn');
     const statusBadge = document.getElementById('statusBadge');
 
-    // Ratio Selector
+    tabTextToImg.addEventListener('click', () => {
+      currentMode = 'text2img';
+      tabTextToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center justify-center gap-2";
+      tabImgToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2";
+      uploadSection.classList.add('hidden');
+      promptLabel.innerText = "Input Prompt";
+      promptInput.placeholder = "Describe your photo... (e.g. A portrait of a Sri Lankan woman smiling, natural outdoor daylight)";
+      btnText.innerText = "Generate Realistic Photo";
+    });
+
+    tabImgToImg.addEventListener('click', () => {
+      currentMode = 'img2img';
+      tabImgToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center justify-center gap-2";
+      tabTextToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2";
+      uploadSection.classList.remove('hidden');
+      promptLabel.innerText = "Realism & Edit Instructions";
+      promptInput.placeholder = "How to modify to look real? (e.g. Make skin natural, remove plastic look, add realistic lighting)";
+      btnText.innerText = "Fix & Make Real";
+    });
+
+    uploadDropzone.addEventListener('click', () => imageInput.click());
+    
+    imageInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      uploadStatusText.innerText = "Uploading photo...";
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+          uploadedImageUrl = data.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+          uploadPreview.src = uploadedImageUrl;
+          uploadPreview.classList.remove('hidden');
+          uploadStatusText.innerText = "Photo uploaded successfully!";
+        } else {
+          alert('Upload failed.');
+        }
+      } catch (err) {
+        alert('Upload error.');
+      }
+    });
+
     document.querySelectorAll('.ratio-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.ratio-btn').forEach(b => {
@@ -114,53 +202,69 @@
       });
     });
 
-    // Enhance Prompt with Qwen
+    // Qwen AI Enhanced with Ultra-Realism keywords
     enhanceBtn.addEventListener('click', async () => {
       const text = promptInput.value.trim();
       if (!text) return alert('Enter prompt first!');
       
       enhanceBtn.disabled = true;
-      enhanceBtn.innerText = 'Enhancing with Qwen...';
+      enhanceBtn.innerText = 'Optimizing for Realism...';
 
       try {
-        const sys = "Expand into a detailed creative prompt under 40 words, output ONLY prompt:";
+        const sys = "Transform the prompt into an ultra-realistic, photorealistic photography description. Explicitly include keywords like: RAW photo, DSLR, 8k uhd, highly detailed skin texture, pores, realistic lighting, Fujifilm color grading, candid photography. Keep under 45 words, output ONLY the prompt:";
         const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + " " + text)}?model=qwen`);
         if (res.ok) {
           promptInput.value = (await res.text()).trim();
         }
       } catch (e) { alert('Error enhancing prompt'); }
       enhanceBtn.disabled = false;
-      enhanceBtn.innerHTML = '<i class="fa-solid fa-brain text-purple-400"></i> Enhance Prompt with Qwen AI';
+      enhanceBtn.innerHTML = '<i class="fa-solid fa-brain text-purple-400"></i> Make Real & Detailed with Qwen AI';
     });
 
-    // Generate Flux Image
     generateBtn.addEventListener('click', () => {
-      const prompt = promptInput.value.trim();
+      let prompt = promptInput.value.trim();
       if (!prompt) return alert('Enter prompt first!');
+
+      if (currentMode === 'img2img' && !uploadedImageUrl) {
+        return alert('Please upload a photo first!');
+      }
+
+      // Automatically append anti-doll and photorealistic tags if missing
+      if (!prompt.toLowerCase().includes('raw photo')) {
+        prompt += ", RAW photo, DSLR quality, 8k resolution, highly detailed skin texture, pores, natural lighting, photorealistic";
+      }
 
       placeholderView.classList.add('hidden');
       resultImg.classList.add('hidden');
       imageActions.classList.add('hidden');
       loadingView.classList.remove('hidden');
-      statusBadge.innerText = 'Generating...';
+      loadingMsg.innerText = currentMode === 'img2img' ? "Transforming into Real Photo..." : "Capturing Photorealistic Image...";
+      statusBadge.innerText = 'Processing...';
 
-      const seed = Math.floor(Math.random() * 999999);
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
+      const seed = Math.floor(Math.random() * 9999999);
+      const cacheBuster = Date.now();
+      let finalUrl = "";
+
+      if (currentMode === 'text2img') {
+        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&cb=${cacheBuster}`;
+      } else {
+        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?image=${encodeURIComponent(uploadedImageUrl)}&width=${width}&height=${height}&seed=${seed}&nologo=true&cb=${cacheBuster}`;
+      }
 
       const img = new Image();
-      img.src = url;
+      img.src = finalUrl;
       img.onload = () => {
         loadingView.classList.add('hidden');
-        resultImg.src = url;
+        resultImg.src = finalUrl;
         resultImg.classList.remove('hidden');
         imageActions.classList.remove('hidden');
-        downloadBtn.href = url;
+        downloadBtn.href = finalUrl;
         statusBadge.innerText = 'Done';
       };
       img.onerror = () => {
         loadingView.classList.add('hidden');
         placeholderView.classList.remove('hidden');
-        alert('Failed to generate image.');
+        alert('Server busy. Please try again!');
         statusBadge.innerText = 'Error';
       };
     });
