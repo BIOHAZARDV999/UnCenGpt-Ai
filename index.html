@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus AI Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight text-white">Nexus AI Studio</h1>
+          <p class="text-xs text-indigo-400 font-medium">Qwen & Flux Power</p>
+        </div>
+      </div>
+      <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        100% Free
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 grid grid-cols-1 md:grid-cols-12 gap-6">
+    
+    <!-- Controls -->
+    <div class="md:col-span-6 flex flex-col gap-4">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+        <label for="promptInput" class="text-sm font-semibold text-slate-300 block mb-2">Input Prompt</label>
+        <textarea id="promptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" placeholder="Type your prompt... (e.g. A futuristic Sri Lankan cyber warrior)"></textarea>
+
+        <button id="enhanceBtn" class="mt-3 w-full py-2.5 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-xl text-xs font-semibold text-purple-200 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-brain text-purple-400"></i>
+          <span>Enhance Prompt with Qwen AI</span>
+        </button>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+        <label class="text-xs text-slate-400 mb-2 block font-medium">Aspect Ratio</label>
+        <div class="grid grid-cols-3 gap-2" id="aspectGroup">
+          <button data-w="1024" data-h="1024" class="ratio-btn active bg-indigo-600 text-white border-indigo-500 py-2 rounded-xl text-xs font-medium border">1:1 Square</button>
+          <button data-w="720" data-h="1280" class="ratio-btn bg-slate-950 text-slate-400 border-slate-800 py-2 rounded-xl text-xs font-medium border">9:16 Portrait</button>
+          <button data-w="1280" data-h="720" class="ratio-btn bg-slate-950 text-slate-400 border-slate-800 py-2 rounded-xl text-xs font-medium border">16:9 Landscape</button>
+        </div>
+      </div>
+
+      <button id="generateBtn" class="w-full py-3.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Generate Image</span>
+      </button>
+    </div>
+
+    <!-- Output Preview -->
+    <div class="md:col-span-6 flex flex-col">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex-1 flex flex-col min-h-[350px]">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-semibold text-slate-300">Generated Result</span>
+          <span id="statusBadge" class="text-[11px] text-slate-500">Ready</span>
+        </div>
+
+        <div class="flex-1 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[250px]">
+          <div id="placeholderView" class="text-center p-6 text-slate-600 text-xs">
+            Enter a prompt and tap 'Generate Image'
+          </div>
+
+          <div id="loadingView" class="hidden absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-3">
+            <div class="w-10 h-10 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
+            <p class="text-xs text-indigo-300 animate-pulse">Generating Image...</p>
+          </div>
+
+          <img id="resultImg" class="hidden w-full h-full object-contain max-h-[450px]" alt="AI Output" />
+        </div>
+
+        <div id="imageActions" class="hidden mt-4 grid grid-cols-2 gap-3">
+          <a id="downloadBtn" download="ai-image.png" target="_blank" class="py-2.5 bg-slate-800 text-center text-slate-200 text-xs font-semibold rounded-xl">Download HD</a>
+          <button id="copyBtn" class="py-2.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl">Copy Prompt</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let width = 1024, height = 1024;
+    const promptInput = document.getElementById('promptInput');
+    const enhanceBtn = document.getElementById('enhanceBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    const placeholderView = document.getElementById('placeholderView');
+    const loadingView = document.getElementById('loadingView');
+    const resultImg = document.getElementById('resultImg');
+    const imageActions = document.getElementById('imageActions');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const statusBadge = document.getElementById('statusBadge');
+
+    // Ratio Selector
+    document.querySelectorAll('.ratio-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ratio-btn').forEach(b => {
+          b.className = 'ratio-btn bg-slate-950 text-slate-400 border-slate-800 py-2 rounded-xl text-xs font-medium border';
+        });
+        btn.className = 'ratio-btn active bg-indigo-600 text-white border-indigo-500 py-2 rounded-xl text-xs font-medium border';
+        width = btn.dataset.w;
+        height = btn.dataset.h;
+      });
+    });
+
+    // Enhance Prompt with Qwen
+    enhanceBtn.addEventListener('click', async () => {
+      const text = promptInput.value.trim();
+      if (!text) return alert('Enter prompt first!');
+      
+      enhanceBtn.disabled = true;
+      enhanceBtn.innerText = 'Enhancing with Qwen...';
+
+      try {
+        const sys = "Expand into a detailed creative prompt under 40 words, output ONLY prompt:";
+        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + " " + text)}?model=qwen`);
+        if (res.ok) {
+          promptInput.value = (await res.text()).trim();
+        }
+      } catch (e) { alert('Error enhancing prompt'); }
+      enhanceBtn.disabled = false;
+      enhanceBtn.innerHTML = '<i class="fa-solid fa-brain text-purple-400"></i> Enhance Prompt with Qwen AI';
+    });
+
+    // Generate Flux Image
+    generateBtn.addEventListener('click', () => {
+      const prompt = promptInput.value.trim();
+      if (!prompt) return alert('Enter prompt first!');
+
+      placeholderView.classList.add('hidden');
+      resultImg.classList.add('hidden');
+      imageActions.classList.add('hidden');
+      loadingView.classList.remove('hidden');
+      statusBadge.innerText = 'Generating...';
+
+      const seed = Math.floor(Math.random() * 999999);
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
+
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        loadingView.classList.add('hidden');
+        resultImg.src = url;
+        resultImg.classList.remove('hidden');
+        imageActions.classList.remove('hidden');
+        downloadBtn.href = url;
+        statusBadge.innerText = 'Done';
+      };
+      img.onerror = () => {
+        loadingView.classList.add('hidden');
+        placeholderView.classList.remove('hidden');
+        alert('Failed to generate image.');
+        statusBadge.innerText = 'Error';
+      };
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(promptInput.value);
+      alert('Prompt Copied!');
+    });
+  </script>
+</body>
+</html>
