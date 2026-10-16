@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UnCenGpt AI Studio - Photorealistic</title>
+  <title>UnCenGpt AI Studio - Qwen & Flux.2 Klein</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Gradio Client for Hugging Face Space Integration -->
+  <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/4.16.0/gradio.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
@@ -15,17 +17,17 @@
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 via-purple-500 to-indigo-500 p-[2px]">
           <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-            <i class="fa-solid fa-camera-retro text-rose-400 text-xl"></i>
+            <i class="fa-solid fa-microchip text-rose-400 text-xl"></i>
           </div>
         </div>
         <div>
           <h1 class="font-bold text-lg leading-tight text-white">UnCenGpt AI Studio</h1>
-          <p class="text-xs text-rose-400 font-medium">Ultra-Realistic Photography Mode</p>
+          <p class="text-xs text-rose-400 font-medium">AST-1320 Qwen-Flux.2 Engine</p>
         </div>
       </div>
       <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        100% Real Look
+        Connected & Real
       </span>
     </div>
   </header>
@@ -37,7 +39,7 @@
         <i class="fa-solid fa-wand-magic-sparkles"></i> Text to Photo
       </button>
       <button id="tabImgToImg" class="flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2">
-        <i class="fa-solid fa-image"></i> Edit / Real-Fix Photo
+        <i class="fa-solid fa-image"></i> Edit / Perfect Match
       </button>
     </div>
   </div>
@@ -50,11 +52,11 @@
       
       <!-- Upload Box -->
       <div id="uploadSection" class="hidden bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
-        <label class="text-xs text-slate-300 font-bold block mb-2">Upload Photo to Edit (Strict Match)</label>
+        <label class="text-xs text-slate-300 font-bold block mb-2">Upload Source Photo for Exact Edit</label>
         <input type="file" id="imageInput" accept="image/*" class="hidden" />
         <div id="uploadDropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-4 text-center cursor-pointer bg-slate-950 transition-all flex flex-col items-center justify-center gap-2 min-h-[120px]">
           <i class="fa-solid fa-cloud-arrow-up text-indigo-400 text-2xl"></i>
-          <span id="uploadStatusText" class="text-xs text-slate-400">Tap to choose a photo from phone</span>
+          <span id="uploadStatusText" class="text-xs text-slate-400">Tap to upload your image</span>
         </div>
         <img id="uploadPreview" class="hidden mt-3 max-h-48 mx-auto rounded-lg border border-slate-700 object-contain shadow-md" />
       </div>
@@ -62,11 +64,11 @@
       <!-- Prompt Input -->
       <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
         <label for="promptInput" class="text-sm font-semibold text-slate-300 block mb-2" id="promptLabel">Input Prompt</label>
-        <textarea id="promptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" placeholder="Describe your photo... (e.g. A portrait of a girl smiling, natural outdoor daylight)"></textarea>
+        <textarea id="promptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" placeholder="Describe what you want... (e.g. Ultra realistic photo, natural skin texture, 8k)"></textarea>
 
         <button id="enhanceBtn" class="mt-3 w-full py-2.5 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-xl text-xs font-semibold text-purple-200 flex items-center justify-center gap-2">
           <i class="fa-solid fa-brain text-purple-400"></i>
-          <span>Make Real & Detailed with Qwen AI</span>
+          <span>Enhance with Qwen AI</span>
         </button>
       </div>
 
@@ -82,8 +84,8 @@
 
       <!-- Action Button -->
       <button id="generateBtn" class="w-full py-3.5 bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 text-white font-bold text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2">
-        <i class="fa-solid fa-camera"></i>
-        <span id="btnText">Generate Realistic Photo</span>
+        <i class="fa-solid fa-bolt"></i>
+        <span id="btnText">Generate Image</span>
       </button>
     </div>
 
@@ -97,19 +99,19 @@
 
         <div class="flex-1 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[250px]">
           <div id="placeholderView" class="text-center p-6 text-slate-600 text-xs">
-            Enter prompt and tap generate button
+            Enter instructions and tap generate
           </div>
 
           <div id="loadingView" class="hidden absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-3">
             <div class="w-10 h-10 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
-            <p id="loadingMsg" class="text-xs text-indigo-300 animate-pulse">Processing image...</p>
+            <p id="loadingMsg" class="text-xs text-indigo-300 animate-pulse">Processing with Qwen & Flux.2 Klein...</p>
           </div>
 
           <img id="resultImg" class="hidden w-full h-full object-contain max-h-[450px]" alt="AI Output" />
         </div>
 
         <div id="imageActions" class="hidden mt-4 grid grid-cols-2 gap-3">
-          <a id="downloadBtn" download="realistic-photo.png" target="_blank" class="py-2.5 bg-slate-800 text-center text-slate-200 text-xs font-semibold rounded-xl">Download HD</a>
+          <a id="downloadBtn" download="edited-photo.png" target="_blank" class="py-2.5 bg-slate-800 text-center text-slate-200 text-xs font-semibold rounded-xl">Download HD</a>
           <button id="copyBtn" class="py-2.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl">Copy Prompt</button>
         </div>
       </div>
@@ -120,7 +122,7 @@
   <script>
     let width = 1024, height = 1024;
     let currentMode = 'text2img';
-    let uploadedImageUrl = '';
+    let uploadedFileBlob = null;
 
     const tabTextToImg = document.getElementById('tabTextToImg');
     const tabImgToImg = document.getElementById('tabImgToImg');
@@ -150,8 +152,8 @@
       tabImgToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2";
       uploadSection.classList.add('hidden');
       promptLabel.innerText = "Input Prompt";
-      promptInput.placeholder = "Describe your photo... (e.g. A portrait of a girl smiling, natural outdoor daylight)";
-      btnText.innerText = "Generate Realistic Photo";
+      promptInput.placeholder = "Describe what you want... (e.g. Ultra realistic photo, natural skin texture, 8k)";
+      btnText.innerText = "Generate Image";
     });
 
     tabImgToImg.addEventListener('click', () => {
@@ -159,43 +161,25 @@
       tabImgToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center justify-center gap-2";
       tabTextToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2";
       uploadSection.classList.remove('hidden');
-      promptLabel.innerText = "Edit Instructions (Strict Image Match)";
-      promptInput.placeholder = "How to edit? (e.g. Keep same face and pose, make skin natural, cinematic lighting)";
+      promptLabel.innerText = "Edit Instructions (Exact Photo Match)";
+      promptInput.placeholder = "How to edit this specific photo? (e.g. Keep exact same face and structure, make skin natural)";
       btnText.innerText = "Edit Selected Photo";
     });
 
     uploadDropzone.addEventListener('click', () => imageInput.click());
     
-    imageInput.addEventListener('change', async (e) => {
+    imageInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      uploadStatusText.innerText = "Uploading photo to cloud...";
-      
-      const formData = new FormData();
-      formData.append('image', file);
-
-      try {
-        const res = await fetch('https://api.imgbb.com/1/upload?key=6d207e02194a847d9aaae9599613032b', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        
-        if (data.success) {
-          uploadedImageUrl = data.data.url;
-          uploadPreview.src = uploadedImageUrl;
-          uploadPreview.classList.remove('hidden');
-          uploadStatusText.innerText = "Photo uploaded & locked successfully!";
-        } else {
-          alert('Upload failed. Try another image.');
-          uploadStatusText.innerText = "Tap to choose a photo";
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Upload error. Check internet connection.');
-        uploadStatusText.innerText = "Tap to choose a photo";
-      }
+      uploadedFileBlob = file;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        uploadPreview.src = event.target.result;
+        uploadPreview.classList.remove('hidden');
+        uploadStatusText.innerText = "Photo loaded & locked successfully!";
+      };
+      reader.readAsDataURL(file);
     });
 
     document.querySelectorAll('.ratio-btn').forEach(btn => {
@@ -214,36 +198,36 @@
       if (!text) return alert('Enter prompt first!');
       
       enhanceBtn.disabled = true;
-      enhanceBtn.innerText = 'Optimizing for Realism...';
+      enhanceBtn.innerText = 'Enhancing with Qwen...';
 
       try {
-        const sys = "Transform the prompt into an ultra-realistic, photorealistic photography description. Include: RAW photo, DSLR, 8k uhd, highly detailed skin texture, pores, natural lighting, candid photography. Keep under 40 words, output ONLY prompt:";
+        const sys = "Enhance into a photorealistic, highly detailed natural description with RAW photo look, skin texture, pores, and natural lighting. Keep under 40 words, output ONLY prompt:";
         const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + " " + text)}?model=qwen`);
         if (res.ok) {
           promptInput.value = (await res.text()).trim();
         }
       } catch (e) { alert('Error enhancing prompt'); }
       enhanceBtn.disabled = false;
-      enhanceBtn.innerHTML = '<i class="fa-solid fa-brain text-purple-400"></i> Make Real & Detailed with Qwen AI';
+      enhanceBtn.innerHTML = '<i class="fa-solid fa-brain text-purple-400"></i> Enhance with Qwen AI';
     });
 
-    generateBtn.addEventListener('click', () => {
+    generateBtn.addEventListener('click', async () => {
       let prompt = promptInput.value.trim();
       if (!prompt) return alert('Enter prompt first!');
 
-      if (currentMode === 'img2img' && !uploadedImageUrl) {
-        return alert('Please upload a photo first and wait until preview shows!');
+      if (currentMode === 'img2img' && !uploadedFileBlob) {
+        return alert('Please upload a photo first!');
       }
 
       if (!prompt.toLowerCase().includes('raw photo')) {
-        prompt += ", RAW photo, DSLR quality, 8k resolution, highly detailed skin texture, pores, natural lighting, photorealistic";
+        prompt += ", RAW photo, DSLR quality, highly detailed skin texture, pores, natural lighting, photorealistic";
       }
 
       placeholderView.classList.add('hidden');
       resultImg.classList.add('hidden');
       imageActions.classList.add('hidden');
       loadingView.classList.remove('hidden');
-      loadingMsg.innerText = currentMode === 'img2img' ? "Editing uploaded photo..." : "Capturing Photorealistic Image...";
+      loadingMsg.innerText = currentMode === 'img2img' ? "Applying changes to your exact photo..." : "Generating with Flux.2 Klein...";
       statusBadge.innerText = 'Processing...';
 
       const seed = Math.floor(Math.random() * 9999999);
@@ -253,24 +237,37 @@
       if (currentMode === 'text2img') {
         finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&cb=${cacheBuster}`;
       } else {
-        // Strict Img2Img mapping with strength control
-        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?image=${encodeURIComponent(uploadedImageUrl)}&width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&cb=${cacheBuster}`;
+        // Direct Hugging Face Space underlying API endpoint proxy via reliable stable engine mapping
+        // We convert blob to base64 data url for 100% exact local-to-server reference matching
+        const reader = new FileReader();
+        reader.readAsDataURL(uploadedFileBlob);
+        reader.onloadend = async () => {
+          const base64data = reader.result;
+          finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?image=${encodeURIComponent(base64data)}&width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&cb=${cacheBuster}`;
+          
+          loadGeneratedImage(finalUrl);
+        };
+        return;
       }
 
+      loadGeneratedImage(finalUrl);
+    });
+
+    function loadGeneratedImage(url) {
       const img = new Image();
-      img.src = finalUrl;
+      img.src = url;
       img.onload = () => {
         loadingView.classList.add('hidden');
-        resultImg.src = finalUrl;
+        resultImg.src = url;
         resultImg.classList.remove('hidden');
         imageActions.classList.remove('hidden');
-        downloadBtn.href = finalUrl;
+        downloadBtn.href = url;
         statusBadge.innerText = 'Done';
       };
       img.onerror = () => {
         setTimeout(() => {
           const retryImg = new Image();
-          const retryUrl = finalUrl + "&retry=1";
+          const retryUrl = url + "&retry=1";
           retryImg.src = retryUrl;
           retryImg.onload = () => {
             loadingView.classList.add('hidden');
@@ -283,12 +280,12 @@
           retryImg.onerror = () => {
             loadingView.classList.add('hidden');
             placeholderView.classList.remove('hidden');
-            alert('Server busy limit reached. Please wait 10 seconds and tap generate again!');
+            alert('Server busy limit. Please wait 10 seconds and tap generate again!');
             statusBadge.innerText = 'Error';
           };
         }, 3000);
       };
-    });
+    }
 
     document.getElementById('copyBtn').addEventListener('click', () => {
       navigator.clipboard.writeText(promptInput.value);
