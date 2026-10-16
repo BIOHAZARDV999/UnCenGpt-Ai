@@ -50,19 +50,19 @@
       
       <!-- Upload Box -->
       <div id="uploadSection" class="hidden bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
-        <label class="text-xs text-slate-300 font-bold block mb-2">Upload Photo to Enhance/Edit</label>
+        <label class="text-xs text-slate-300 font-bold block mb-2">Upload Photo to Edit (Strict Match)</label>
         <input type="file" id="imageInput" accept="image/*" class="hidden" />
         <div id="uploadDropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-4 text-center cursor-pointer bg-slate-950 transition-all flex flex-col items-center justify-center gap-2 min-h-[120px]">
           <i class="fa-solid fa-cloud-arrow-up text-indigo-400 text-2xl"></i>
           <span id="uploadStatusText" class="text-xs text-slate-400">Tap to choose a photo from phone</span>
         </div>
-        <img id="uploadPreview" class="hidden mt-3 max-h-40 mx-auto rounded-lg border border-slate-700 object-contain" />
+        <img id="uploadPreview" class="hidden mt-3 max-h-48 mx-auto rounded-lg border border-slate-700 object-contain shadow-md" />
       </div>
 
       <!-- Prompt Input -->
       <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
         <label for="promptInput" class="text-sm font-semibold text-slate-300 block mb-2" id="promptLabel">Input Prompt</label>
-        <textarea id="promptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" placeholder="Describe your photo... (e.g. A portrait of a Sri Lankan woman smiling, natural outdoor daylight)"></textarea>
+        <textarea id="promptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" placeholder="Describe your photo... (e.g. A portrait of a girl smiling, natural outdoor daylight)"></textarea>
 
         <button id="enhanceBtn" class="mt-3 w-full py-2.5 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-xl text-xs font-semibold text-purple-200 flex items-center justify-center gap-2">
           <i class="fa-solid fa-brain text-purple-400"></i>
@@ -102,7 +102,7 @@
 
           <div id="loadingView" class="hidden absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-3">
             <div class="w-10 h-10 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
-            <p id="loadingMsg" class="text-xs text-indigo-300 animate-pulse">Capturing realistic photo...</p>
+            <p id="loadingMsg" class="text-xs text-indigo-300 animate-pulse">Processing image...</p>
           </div>
 
           <img id="resultImg" class="hidden w-full h-full object-contain max-h-[450px]" alt="AI Output" />
@@ -150,7 +150,7 @@
       tabImgToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2";
       uploadSection.classList.add('hidden');
       promptLabel.innerText = "Input Prompt";
-      promptInput.placeholder = "Describe your photo... (e.g. A portrait of a Sri Lankan woman smiling, natural outdoor daylight)";
+      promptInput.placeholder = "Describe your photo... (e.g. A portrait of a girl smiling, natural outdoor daylight)";
       btnText.innerText = "Generate Realistic Photo";
     });
 
@@ -159,9 +159,9 @@
       tabImgToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center justify-center gap-2";
       tabTextToImg.className = "flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2";
       uploadSection.classList.remove('hidden');
-      promptLabel.innerText = "Realism & Edit Instructions";
-      promptInput.placeholder = "How to modify to look real? (e.g. Make skin natural, remove plastic look, add realistic lighting)";
-      btnText.innerText = "Fix & Make Real";
+      promptLabel.innerText = "Edit Instructions (Strict Image Match)";
+      promptInput.placeholder = "How to edit? (e.g. Keep same face and pose, make skin natural, cinematic lighting)";
+      btnText.innerText = "Edit Selected Photo";
     });
 
     uploadDropzone.addEventListener('click', () => imageInput.click());
@@ -170,24 +170,31 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      uploadStatusText.innerText = "Uploading photo...";
+      uploadStatusText.innerText = "Uploading photo to cloud...";
+      
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('image', file);
 
       try {
-        const res = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: formData });
+        const res = await fetch('https://api.imgbb.com/1/upload?key=6d207e02194a847d9aaae9599613032b', {
+          method: 'POST',
+          body: formData
+        });
         const data = await res.json();
         
-        if (data.status === 'success') {
-          uploadedImageUrl = data.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+        if (data.success) {
+          uploadedImageUrl = data.data.url;
           uploadPreview.src = uploadedImageUrl;
           uploadPreview.classList.remove('hidden');
-          uploadStatusText.innerText = "Photo uploaded successfully!";
+          uploadStatusText.innerText = "Photo uploaded & locked successfully!";
         } else {
-          alert('Upload failed.');
+          alert('Upload failed. Try another image.');
+          uploadStatusText.innerText = "Tap to choose a photo";
         }
       } catch (err) {
-        alert('Upload error.');
+        console.error(err);
+        alert('Upload error. Check internet connection.');
+        uploadStatusText.innerText = "Tap to choose a photo";
       }
     });
 
@@ -202,7 +209,6 @@
       });
     });
 
-    // Qwen AI Enhanced with Ultra-Realism keywords
     enhanceBtn.addEventListener('click', async () => {
       const text = promptInput.value.trim();
       if (!text) return alert('Enter prompt first!');
@@ -211,7 +217,7 @@
       enhanceBtn.innerText = 'Optimizing for Realism...';
 
       try {
-        const sys = "Transform the prompt into an ultra-realistic, photorealistic photography description. Explicitly include keywords like: RAW photo, DSLR, 8k uhd, highly detailed skin texture, pores, realistic lighting, Fujifilm color grading, candid photography. Keep under 45 words, output ONLY the prompt:";
+        const sys = "Transform the prompt into an ultra-realistic, photorealistic photography description. Include: RAW photo, DSLR, 8k uhd, highly detailed skin texture, pores, natural lighting, candid photography. Keep under 40 words, output ONLY prompt:";
         const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + " " + text)}?model=qwen`);
         if (res.ok) {
           promptInput.value = (await res.text()).trim();
@@ -226,10 +232,9 @@
       if (!prompt) return alert('Enter prompt first!');
 
       if (currentMode === 'img2img' && !uploadedImageUrl) {
-        return alert('Please upload a photo first!');
+        return alert('Please upload a photo first and wait until preview shows!');
       }
 
-      // Automatically append anti-doll and photorealistic tags if missing
       if (!prompt.toLowerCase().includes('raw photo')) {
         prompt += ", RAW photo, DSLR quality, 8k resolution, highly detailed skin texture, pores, natural lighting, photorealistic";
       }
@@ -238,7 +243,7 @@
       resultImg.classList.add('hidden');
       imageActions.classList.add('hidden');
       loadingView.classList.remove('hidden');
-      loadingMsg.innerText = currentMode === 'img2img' ? "Transforming into Real Photo..." : "Capturing Photorealistic Image...";
+      loadingMsg.innerText = currentMode === 'img2img' ? "Editing uploaded photo..." : "Capturing Photorealistic Image...";
       statusBadge.innerText = 'Processing...';
 
       const seed = Math.floor(Math.random() * 9999999);
@@ -248,7 +253,8 @@
       if (currentMode === 'text2img') {
         finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&cb=${cacheBuster}`;
       } else {
-        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?image=${encodeURIComponent(uploadedImageUrl)}&width=${width}&height=${height}&seed=${seed}&nologo=true&cb=${cacheBuster}`;
+        // Strict Img2Img mapping with strength control
+        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?image=${encodeURIComponent(uploadedImageUrl)}&width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&cb=${cacheBuster}`;
       }
 
       const img = new Image();
@@ -262,10 +268,25 @@
         statusBadge.innerText = 'Done';
       };
       img.onerror = () => {
-        loadingView.classList.add('hidden');
-        placeholderView.classList.remove('hidden');
-        alert('Server busy. Please try again!');
-        statusBadge.innerText = 'Error';
+        setTimeout(() => {
+          const retryImg = new Image();
+          const retryUrl = finalUrl + "&retry=1";
+          retryImg.src = retryUrl;
+          retryImg.onload = () => {
+            loadingView.classList.add('hidden');
+            resultImg.src = retryUrl;
+            resultImg.classList.remove('hidden');
+            imageActions.classList.remove('hidden');
+            downloadBtn.href = retryUrl;
+            statusBadge.innerText = 'Done';
+          };
+          retryImg.onerror = () => {
+            loadingView.classList.add('hidden');
+            placeholderView.classList.remove('hidden');
+            alert('Server busy limit reached. Please wait 10 seconds and tap generate again!');
+            statusBadge.innerText = 'Error';
+          };
+        }, 3000);
       };
     });
 
